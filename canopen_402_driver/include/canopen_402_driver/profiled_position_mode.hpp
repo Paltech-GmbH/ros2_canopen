@@ -69,6 +69,12 @@ public:
     if (hasTarget())
     {
       int32_t target = getTarget();
+      if ((sw_ & MASK_Acknowledged) && (sw_ & MASK_Reached))
+      {
+        driver->universal_set_value(index, 0x0, target);
+        cw.reset(CW_NewPoint);
+        last_target_ = std::numeric_limits<double>::quiet_NaN();
+      }
       if ((sw_ & MASK_Acknowledged) == 0 && target != last_target_)
       {
         if (cw.get(CW_NewPoint))
@@ -79,11 +85,11 @@ public:
         {
           driver->universal_set_value(index, 0x0, target);
           cw.set(CW_NewPoint);
-          last_target_ = target;
         }
       }
       else if (sw_ & MASK_Acknowledged)
       {
+        last_target_ = target;
         cw.reset(CW_NewPoint);
       }
       return true;
