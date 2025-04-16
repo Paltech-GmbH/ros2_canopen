@@ -45,6 +45,11 @@ void NodeCanopen402Driver<rclcpp::Node>::init(bool called_from_base)
   NodeCanopenProxyDriver<rclcpp::Node>::init(false);
   publish_joint_state =
     this->node_->create_publisher<sensor_msgs::msg::JointState>("~/joint_states", 1);
+  receive_target_ =
+    this->node_->create_subscription<std_msgs::msg::Float64>("~/set_target_topic", 10, 
+    std::bind(
+      &NodeCanopen402Driver<rclcpp::Node>::handle_set_target_topic_, this,
+      std::placeholders::_1));
   handle_init_service = this->node_->create_service<std_srvs::srv::Trigger>(
     std::string(this->node_->get_name()).append("/init").c_str(),
     std::bind(
@@ -113,6 +118,11 @@ void NodeCanopen402Driver<rclcpp_lifecycle::LifecycleNode>::init(bool called_fro
   NodeCanopenProxyDriver<rclcpp_lifecycle::LifecycleNode>::init(false);
   publish_joint_state =
     this->node_->create_publisher<sensor_msgs::msg::JointState>("~/joint_states", 10);
+  receive_target_ =
+    this->node_->create_subscription<std_msgs::msg::Float64>("~/set_target_topic", 10, 
+    std::bind(
+      &NodeCanopen402Driver<rclcpp_lifecycle::LifecycleNode>::handle_set_target_topic_, this,
+      std::placeholders::_1));
   handle_init_service = this->node_->create_service<std_srvs::srv::Trigger>(
     std::string(this->node_->get_name()).append("/init").c_str(),
     std::bind(
@@ -440,6 +450,34 @@ void NodeCanopen402Driver<NODETYPE>::handle_set_target(
     }
 
     response->success = motor_->setTarget(target);
+  }
+}
+
+template <class NODETYPE>
+void NodeCanopen402Driver<NODETYPE>::handle_set_target_topic_(const std_msgs::msg::Float64::SharedPtr msg)
+{
+  if (this->activated_.load())
+  {
+    auto mode = motor_->getMode();
+    double target;
+    if (
+      (mode == MotorBase::Profiled_Position) or (mode == MotorBase::Cyclic_Synchronous_Position) or
+      (mode == MotorBase::Interpolated_Position))
+    {
+      target = msg->data * scale_pos_to_dev_;
+    }
+    else if (
+      (mode == MotorBase::Velocity) or (mode == MotorBase::Profiled_Velocity) or
+      (mode == MotorBase::Cyclic_Synchronous_Velocity))
+    {
+      target = msg->data * scale_vel_to_dev_;
+    }
+    else
+    {
+      target = msg->data;
+    }
+    RCLCPP_INFO(this->node_->get_logger(), "Scaled target %f", target);
+    motor_->setTarget(target);
   }
 }
 

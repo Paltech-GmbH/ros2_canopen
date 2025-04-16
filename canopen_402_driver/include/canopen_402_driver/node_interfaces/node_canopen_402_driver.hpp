@@ -24,6 +24,7 @@
 #include "canopen_interfaces/srv/co_target_double.hpp"
 #include "canopen_proxy_driver/node_interfaces/node_canopen_proxy_driver.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "std_msgs/msg/float64.hpp"
 
 namespace ros2_canopen
 {
@@ -52,6 +53,7 @@ protected:
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr handle_set_mode_interpolated_position_service;
   rclcpp::Service<canopen_interfaces::srv::COTargetDouble>::SharedPtr handle_set_target_service;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr publish_joint_state;
+  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr receive_target_;
   double scale_pos_to_dev_;
   double scale_pos_from_dev_;
   double scale_vel_to_dev_;
@@ -331,6 +333,8 @@ public:
   void handle_set_target(
     const canopen_interfaces::srv::COTargetDouble::Request::SharedPtr request,
     canopen_interfaces::srv::COTargetDouble::Response::SharedPtr response);
+
+  void handle_set_target_topic_(const std_msgs::msg::Float64::SharedPtr msg);
 
   /**
    * @brief Method to set target
