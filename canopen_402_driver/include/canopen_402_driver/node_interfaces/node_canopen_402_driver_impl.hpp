@@ -476,7 +476,7 @@ void NodeCanopen402Driver<NODETYPE>::handle_set_target_topic_(const std_msgs::ms
     {
       target = msg->data;
     }
-    RCLCPP_INFO(this->node_->get_logger(), "Scaled target %f", target);
+    // RCLCPP_INFO(this->node_->get_logger(), "Scaled target %f", target);
     motor_->setTarget(target);
   }
 }
