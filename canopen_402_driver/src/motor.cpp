@@ -255,7 +255,7 @@ void Motor402::handleRead() { readState(); }
 void Motor402::handleWrite()
 {
   std::scoped_lock lock(cw_mutex_);
-  control_word_ |= (1 << Command402::CW_Halt);
+  // control_word_ |= (1 << Command402::CW_Halt);
   if (state_handler_.getState() == State402::Operation_Enable)
   {
     std::scoped_lock lock(mode_mutex_);
