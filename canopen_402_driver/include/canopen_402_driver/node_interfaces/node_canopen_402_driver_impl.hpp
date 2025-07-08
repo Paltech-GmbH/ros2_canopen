@@ -586,6 +586,7 @@ void NodeCanopen402Driver<NODETYPE>::handle_set_target_topic_(const std_msgs::ms
   }
 }
 
+template <class NODETYPE>
 void NodeCanopen402Driver<NODETYPE>::handle_disable(
   const std_srvs::srv::Trigger::Request::SharedPtr request,
   std_srvs::srv::Trigger::Response::SharedPtr response)
